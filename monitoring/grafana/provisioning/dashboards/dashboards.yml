@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: airport-fraud
+    folder: Airport Fraud Lab
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

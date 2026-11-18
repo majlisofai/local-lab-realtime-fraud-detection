@@ -1,0 +1,97 @@
+{
+  "name": "aurora",
+  "title": "Aurora",
+  "wordmark": "aurora",
+  "tag": "MLOPS LAB",
+  "strip_emoji": true,
+  "source": "skill brand-aurora · design system https://claude.ai/artifact/GPNoFY8mv4XekY3r9HKz3C",
+  "fonts_css": "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Bricolage+Grotesque:opsz,wght@12..96,300..700&display=swap",
+  "diagram": {
+    "sketch": false,
+    "canvas": "#0D1326",
+    "font": "Atkinson Hyperlegible",
+    "font_url": "https://fonts.googleapis.com/css?family=Atkinson+Hyperlegible:400,700",
+    "mono": "JetBrains Mono",
+    "text": "#E9EEF8",
+    "muted": "#A3AFCB",
+    "node": {
+      "fill": "#0D1326",
+      "stroke": "#E9EEF8",
+      "width": 1,
+      "radius": 4
+    },
+    "zone": {
+      "fill": "#151D36",
+      "stroke": "none"
+    },
+    "group_stroke": "#56627F",
+    "accent": {
+      "fill": "#0D1326",
+      "stroke": "#E9EEF8",
+      "text": "#E9EEF8"
+    },
+    "stream": "#9DA8FF",
+    "monitor": "#9DA8FF",
+    "alert": "#5CE0A0",
+    "edge": "#A3AFCB",
+    "edge_label_bg": "#0D1326",
+    "focal": {
+      "stroke": "#5CE0A0",
+      "width": 3
+    },
+    "band_stroke": "none",
+    "archimate": {
+      "business": {
+        "fill": "#0D1326",
+        "stroke": "#E9EEF8"
+      },
+      "application": {
+        "fill": "#0D1326",
+        "stroke": "#E9EEF8"
+      },
+      "technology": {
+        "fill": "#0D1326",
+        "stroke": "#E9EEF8"
+      },
+      "bands": [
+        "#151D36",
+        "#151D36",
+        "#151D36"
+      ],
+      "grouping": "#56627F"
+    }
+  },
+  "mermaid": {
+    "fontFamily": "Atkinson Hyperlegible, Segoe UI, sans-serif",
+    "fontSize": "14px",
+    "darkMode": true,
+    "background": "#0D1326",
+    "primaryColor": "#0D1326",
+    "primaryTextColor": "#E9EEF8",
+    "primaryBorderColor": "#E9EEF8",
+    "secondaryColor": "#151D36",
+    "tertiaryColor": "#0D1326",
+    "lineColor": "#A3AFCB",
+    "textColor": "#E9EEF8",
+    "mainBkg": "#0D1326",
+    "clusterBkg": "#151D36",
+    "clusterBorder": "#27314F",
+    "titleColor": "#A3AFCB",
+    "edgeLabelBackground": "#0D1326",
+    "noteBkgColor": "#151D36",
+    "noteTextColor": "#E9EEF8",
+    "noteBorderColor": "#27314F",
+    "actorBkg": "#0D1326",
+    "actorBorder": "#E9EEF8",
+    "actorTextColor": "#E9EEF8",
+    "actorLineColor": "#56627F",
+    "signalColor": "#E9EEF8",
+    "signalTextColor": "#E9EEF8",
+    "labelBoxBkgColor": "#151D36",
+    "labelBoxBorderColor": "#56627F",
+    "labelTextColor": "#E9EEF8",
+    "loopTextColor": "#9DA8FF",
+    "sequenceNumberColor": "#0D1326",
+    "pie3": "#5CE0A0"
+  }
+}

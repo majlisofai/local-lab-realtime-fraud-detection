@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 240" role="img" aria-label="aurora · Airport real-time fraud detection">
+  <rect width="1200" height="240" rx="8" fill="#0D1326"/>
+  <rect x=".5" y=".5" width="1199" height="239" rx="8" fill="none" stroke="#27314F"/>
+  <!-- the mark (brand-aurora asset geometry) -->
+  <g transform="translate(64 40) scale(.75)">
+    <g fill="none" stroke-linecap="round" stroke-width="6">
+      <path d="M20 42V26" stroke="#9DA8FF"/><path d="M32 42V12" stroke="#5CE0A0"/><path d="M44 42V32" stroke="#9DA8FF"/>
+    </g>
+    <path d="M10 51H54" stroke="#E9EEF8" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <text x="122" y="82" font-family="Bricolage Grotesque, Avenir Next, system-ui, sans-serif" font-size="28" font-weight="600" fill="#E9EEF8">aurora</text>
+  <text x="64" y="128" font-family="JetBrains Mono, ui-monospace, Menlo, monospace" font-size="12" font-weight="600" letter-spacing="1" fill="#A3AFCB">AURORA · TUTORIAL · FRAUD LAB · T1.0</text>
+  <text x="64" y="176" font-family="Bricolage Grotesque, Avenir Next, system-ui, sans-serif" font-size="44" font-weight="400" fill="#E9EEF8">Airport real-time fraud detection</text>
+  <text x="64" y="206" font-family="JetBrains Mono, ui-monospace, Menlo, monospace" font-size="13" fill="#A3AFCB">Kafka · Feast · MLflow · FastAPI · Prometheus · Evidently · Prefect — Docker Compose</text>
+  <!-- the one signal: a status pill -->
+  <rect x="1008" y="40" width="128" height="28" rx="14" fill="none" stroke="#9DA8FF"/>
+  <text x="1072" y="59" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, Menlo, monospace" font-size="12" font-weight="600" letter-spacing="1" fill="#9DA8FF">FOR REVIEW</text>
+  <circle cx="1124" cy="196" r="6" fill="#5CE0A0"/>
+</svg>

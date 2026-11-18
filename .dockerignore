@@ -1,0 +1,8 @@
+.git
+.venv
+dvc-storage
+data
+reports
+mlruns
+**/__pycache__
+feature_repo/data

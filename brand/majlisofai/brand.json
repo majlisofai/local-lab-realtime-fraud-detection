@@ -1,0 +1,89 @@
+{
+  "name": "majlisofai",
+  "title": "The Majlis of AI",
+  "wordmark": "THE MAJLIS OF AI",
+  "tag": "ACADEMY",
+  "strip_emoji": true,
+  "fonts_css": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@600&family=IBM+Plex+Mono:wght@400;500&family=Architects+Daughter&display=swap",
+  "diagram": {
+    "sketch": false,
+    "canvas": "#FFFFFF",
+    "font": "IBM Plex Sans",
+    "font_url": "https://fonts.googleapis.com/css?family=IBM+Plex+Sans:300,400,500,600",
+    "mono": "IBM Plex Mono",
+    "text": "#111111",
+    "muted": "#5C5C5C",
+    "node": {
+      "fill": "#FFFFFF",
+      "stroke": "#111111",
+      "width": 1,
+      "radius": 0
+    },
+    "zone": {
+      "fill": "#F5F5F5",
+      "stroke": "#D9D9D9"
+    },
+    "accent": {
+      "fill": "#FFFFFF",
+      "stroke": "#111111",
+      "text": "#111111"
+    },
+    "stream": "#111111",
+    "monitor": "#CC3A1C",
+    "alert": "#CC3A1C",
+    "edge": "#5C5C5C",
+    "edge_label_bg": "#FFFFFF",
+    "focal": {
+      "stroke": "#CC3A1C",
+      "width": 3
+    },
+    "band_stroke": "#D9D9D9",
+    "archimate": {
+      "business": {
+        "fill": "#FFFFFF",
+        "stroke": "#111111"
+      },
+      "application": {
+        "fill": "#FFFFFF",
+        "stroke": "#111111"
+      },
+      "technology": {
+        "fill": "#FFFFFF",
+        "stroke": "#111111"
+      },
+      "bands": [
+        "#FFFFFF",
+        "#FFFFFF",
+        "#FFFFFF"
+      ],
+      "grouping": "#999999"
+    },
+    "group_stroke": "#111111"
+  },
+  "mermaid": {
+    "fontFamily": "IBM Plex Sans, Segoe UI, sans-serif",
+    "fontSize": "14px",
+    "background": "#FFFFFF",
+    "primaryColor": "#FFFFFF",
+    "primaryTextColor": "#111111",
+    "primaryBorderColor": "#111111",
+    "secondaryColor": "#F5F5F5",
+    "tertiaryColor": "#FFFFFF",
+    "lineColor": "#5C5C5C",
+    "textColor": "#111111",
+    "mainBkg": "#FFFFFF",
+    "clusterBkg": "#FFFFFF",
+    "clusterBorder": "#D9D9D9",
+    "edgeLabelBackground": "#FFFFFF",
+    "noteBkgColor": "#F5F5F5",
+    "noteTextColor": "#111111",
+    "noteBorderColor": "#D9D9D9",
+    "actorBkg": "#FFFFFF",
+    "actorBorder": "#111111",
+    "signalColor": "#111111",
+    "pie1": "#111111",
+    "pie2": "#5C5C5C",
+    "pie3": "#CC3A1C"
+  },
+  "source": "skill brand-tmofai · design system https://claude.ai/artifact/AHrYfMPy9UfeaYPYPa67UA"
+}

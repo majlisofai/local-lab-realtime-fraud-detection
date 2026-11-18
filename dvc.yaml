@@ -1,0 +1,27 @@
+# Step 4 - Ingest. `dvc repro` rebuilds only the stages whose code, params or data changed.
+stages:
+  generate:
+    cmd: uv run python -m fraud.data.generate
+    deps:
+      - src/fraud/data/generate.py
+      - src/fraud/simulation.py
+    params:
+      - data.seed
+      - data.n_passengers
+      - data.history_days
+      - data.txn_per_day
+    outs:
+      - data/raw/transactions.parquet
+      - data/raw/passengers.parquet
+
+  features:
+    cmd: uv run python -m fraud.data.build_features
+    deps:
+      - src/fraud/data/build_features.py
+      - data/raw/transactions.parquet
+      - data/raw/passengers.parquet
+    params:
+      - data.warmup_days
+    outs:
+      - feature_repo/data/passenger_features.parquet
+      - data/processed/training_events.parquet

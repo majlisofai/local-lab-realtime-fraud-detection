@@ -1,0 +1,10 @@
+# MLflow tracking server + model registry (Postgres backend, artifacts served by the server).
+# The backend URI carries credentials, so it is passed at runtime by docker-compose from .env.
+FROM python:3.11-slim
+
+COPY --from=ghcr.io/astral-sh/uv:0.13.7 /uv /uvx /bin/
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv pip install --system mlflow==2.22.0 "sqlalchemy<2.1" psycopg2-binary==2.9.10
+
+EXPOSE 5000

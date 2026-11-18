@@ -1,0 +1,30 @@
+# Single source of truth for the lab. DVC tracks these params,
+# so changing any value here makes `dvc repro` rebuild the affected stages.
+
+data:
+  seed: 42
+  n_passengers: 2000        # loyalty / card holders that travel through our airports
+  history_days: 60          # days of historical transactions to generate
+  txn_per_day: 1200         # ~72k historical transactions
+  warmup_days: 30           # first 30 days only build passenger history (full 30-day windows for training)
+
+train:
+  experiment: airport-fraud-detection
+  valid_size: 0.15          # time-based split: train | valid | test (oldest -> newest)
+  test_size: 0.15
+  reference_sample: 5000    # rows logged with the model as Evidently drift reference
+  models:
+    logistic_regression:
+      C: 1.0
+    random_forest:
+      n_estimators: 200
+      max_depth: 12
+    hist_gradient_boosting:
+      max_iter: 300
+      learning_rate: 0.08
+
+publish:
+  model_name: airport-fraud-detector
+  alias: champion
+  metric: test_pr_auc       # metric used to pick the best run
+  min_metric: 0.40          # quality gate: never publish a model below this

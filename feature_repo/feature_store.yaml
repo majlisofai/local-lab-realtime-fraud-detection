@@ -1,0 +1,9 @@
+project: airport_fraud
+registry: data/registry.db          # metadata: entities, feature views, feature services
+provider: local
+offline_store:
+  type: file                        # parquet files = history for training
+online_store:
+  type: redis                       # latest value per passenger = low-latency serving
+  connection_string: ${REDIS_HOST}:6379
+entity_key_serialization_version: 3

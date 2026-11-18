@@ -1,0 +1,55 @@
+schema: '2.0'
+stages:
+  generate:
+    cmd: uv run python -m fraud.data.generate
+    deps:
+    - path: src/fraud/data/generate.py
+      hash: md5
+      md5: f6b22d0fedb1a3a23d8a2236b5151159
+      size: 1271
+    - path: src/fraud/simulation.py
+      hash: md5
+      md5: 31e57c29f53b2ccd6f05b8272715d69e
+      size: 4692
+    params:
+      params.yaml:
+        data.history_days: 60
+        data.n_passengers: 2000
+        data.seed: 42
+        data.txn_per_day: 1200
+    outs:
+    - path: data/raw/passengers.parquet
+      hash: md5
+      md5: e68db0844bfe646bcfbdd4c3e675c735
+      size: 56066
+    - path: data/raw/transactions.parquet
+      hash: md5
+      md5: db6cde336e30bd78d3846502071fba3f
+      size: 2769645
+  features:
+    cmd: uv run python -m fraud.data.build_features
+    deps:
+    - path: data/raw/passengers.parquet
+      hash: md5
+      md5: e68db0844bfe646bcfbdd4c3e675c735
+      size: 56066
+    - path: data/raw/transactions.parquet
+      hash: md5
+      md5: db6cde336e30bd78d3846502071fba3f
+      size: 2769645
+    - path: src/fraud/data/build_features.py
+      hash: md5
+      md5: dd519a568cee8a9560d2f2cadf1ec731
+      size: 2984
+    params:
+      params.yaml:
+        data.warmup_days: 30
+    outs:
+    - path: data/processed/training_events.parquet
+      hash: md5
+      md5: 81be33d8c8024a6e49923914607597e0
+      size: 1430529
+    - path: feature_repo/data/passenger_features.parquet
+      hash: md5
+      md5: 05c56f9df35b046da701b2d25e0e1943
+      size: 821005

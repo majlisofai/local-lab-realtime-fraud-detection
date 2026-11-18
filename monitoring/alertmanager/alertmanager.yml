@@ -1,0 +1,15 @@
+# Every alert goes to the lab console webhook. The console logs it and, for
+# alerts labelled `action: retrain` (DataDriftDetected), starts the Prefect
+# retrain pipeline (with a cooldown so a long drift does not loop retraining).
+route:
+  receiver: lab-console
+  group_by: [alertname]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 5m          # re-notify so a drift that outlives the cooldown retriggers
+
+receivers:
+  - name: lab-console
+    webhook_configs:
+      - url: http://lab-console:8090/alertmanager
+        send_resolved: true

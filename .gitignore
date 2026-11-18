@@ -1,0 +1,29 @@
+# Python / uv
+.venv/
+__pycache__/
+*.pyc
+
+# DVC-managed data (the .dvc metadata + dvc.lock are committed, the files are not)
+/dvc-storage/
+/data/raw/*.parquet
+/data/processed/*.parquet
+
+# Feast
+feature_repo/data/registry.db
+feature_repo/data/online_store.db
+
+# Lab runtime
+/reports/*
+!/reports/.gitkeep
+/control/scenario
+mlruns/
+
+# Brand builds (make fonts / make docs)
+/build/
+/site/
+
+# Secrets
+.env
+
+# macOS
+.DS_Store

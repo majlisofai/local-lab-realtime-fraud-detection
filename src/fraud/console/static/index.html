@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Airport Fraud Lab Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* slate + indigo palette (same design language as AskRoom) */
+    --bg: #020617; --panel: #0f172a; --inset: #020617; --line: #1e293b; --line-2: #334155;
+    --ink: #f1f5f9; --ink-2: #cbd5e1; --muted: #94a3b8; --faint: #64748b;
+    --brand: #4f46e5; --brand-hi: #6366f1; --brand-ink: #a5b4fc; --brand-soft: rgba(99, 102, 241, .18);
+    --idle: #334155; --run: #818cf8; --run-soft: rgba(99, 102, 241, .32);
+    --ok: #34d399; --ok-soft: rgba(16, 185, 129, .16); --bad: #f87171; --bad-soft: rgba(239, 68, 68, .16);
+    --live: #34d399;
+    --band-data: rgba(245, 158, 11, .07); --band-ml: rgba(99, 102, 241, .08);
+    --band-rt: rgba(6, 182, 212, .07); --band-mon: rgba(168, 85, 247, .08);
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body { margin: 0; color: var(--ink); -webkit-font-smoothing: antialiased;
+         font: 14px/1.45 Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         background: radial-gradient(ellipse at top, rgba(49, 46, 129, .35), var(--bg) 55%) fixed, var(--bg); }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: rgba(15, 23, 42, .6); }
+  ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, .4); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, .7); }
+
+  header { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px;
+           min-height: 56px; padding: 8px 16px; background: rgba(15, 23, 42, .8); backdrop-filter: blur(8px);
+           border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo { width: 32px; height: 32px; border-radius: 8px; background: var(--brand); display: grid; place-items: center;
+          box-shadow: 0 10px 15px -3px rgba(99, 102, 241, .3); }
+  .logo svg { width: 18px; height: 18px; animation: breathe 2s cubic-bezier(.4, 0, .6, 1) infinite; }
+  @keyframes breathe { 50% { opacity: .5; } }
+  .brand h1 { margin: 0; font-size: 18px; font-weight: 800; letter-spacing: -.025em;
+              background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .tag { font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: #1e293b; color: var(--muted); border: 1px solid var(--line-2); }
+  header nav { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px; background: var(--panel);
+               border: 1px solid var(--line); border-radius: 8px; font-size: 12px; }
+  header nav a { color: var(--muted); text-decoration: none; padding: 4px 10px; border-radius: 6px; transition: color .15s, background .15s; }
+  header nav a:hover { color: #fff; background: var(--brand); }
+  #conn { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; padding: 4px 12px; border-radius: 999px;
+          background: rgba(30, 41, 59, .8); border: 1px solid var(--line-2); font: 500 12px var(--mono); color: var(--brand-ink); }
+  #conn .ping { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--faint); }
+  #conn.ok .ping { background: var(--ok); }
+  #conn.ok .ping::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--ok); animation: ping 1s cubic-bezier(0, 0, .2, 1) infinite; }
+  #conn.err { color: var(--bad); }
+  #conn.err .ping { background: var(--bad); }
+  @keyframes ping { 75%, 100% { transform: scale(2.2); opacity: 0; } }
+
+  main { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; padding: 16px; }
+  @media (max-width: 1100px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-bottom: 10px; margin-bottom: 8px;
+               border-bottom: 1px solid var(--line); }
+  .eyebrow { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; letter-spacing: .05em;
+             text-transform: uppercase; color: var(--run); }
+  .eyebrow svg { width: 16px; height: 16px; }
+  .hint { font: 500 11.5px var(--mono); color: var(--muted); }
+  #arch { padding: 16px; }
+  #arch > svg { width: 100%; height: auto; display: block; }
+  .band { stroke: none; }
+  .band-label { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; fill: var(--muted); }
+  .node rect.box { fill: var(--inset); stroke: var(--idle); stroke-width: 1.5; transition: fill .3s, stroke .3s; }
+  .node .label { font-size: 15px; font-weight: 700; fill: var(--ink); }
+  .node .sub { font-size: 11.5px; fill: var(--muted); }
+  .node .detail { font: 500 11px var(--mono); fill: var(--brand-ink); }
+  .node .dot { fill: var(--idle); }
+  .node.live .dot { fill: var(--live); }
+  .node.live rect.box { stroke: rgba(52, 211, 153, .45); }
+  .node.alarm rect.box { stroke: var(--bad); }
+  .node.alarm .dot { fill: var(--bad); }
+  .node.running rect.box { stroke: var(--brand-hi); stroke-width: 3; fill: var(--run-soft); animation: pulse 1.1s ease-in-out infinite; }
+  .node.done rect.box { stroke: var(--ok); stroke-width: 2.5; fill: var(--ok-soft); }
+  .node.failed rect.box { stroke: var(--bad); stroke-width: 2.5; fill: var(--bad-soft); }
+  /* status pill straddling the top border, so it never covers the detail line */
+  .node .badge-bg { display: none; stroke-width: 1.5; }
+  .node .badge { font-size: 10.5px; font-weight: 700; letter-spacing: .03em; }
+  .node.running .badge-bg { display: block; fill: var(--brand); stroke: var(--brand-hi); }
+  .node.running .badge { fill: #fff; }
+  .node.done .badge-bg { display: block; fill: #022c22; stroke: var(--ok); }
+  .node.done .badge { fill: var(--ok); }
+  .node.failed .badge-bg { display: block; fill: #450a0a; stroke: var(--bad); }
+  .node.failed .badge { fill: var(--bad); }
+  @keyframes pulse { 50% { stroke-opacity: .35; } }
+  .edge { fill: none; stroke: var(--idle); stroke-width: 2; marker-end: url(#arrow-idle); }
+  .edge.orch { stroke-dasharray: 2 5; }
+  .edge.active { stroke: var(--brand-hi); stroke-width: 3; stroke-dasharray: 9 6; animation: flow .7s linear infinite; marker-end: url(#arrow-run); }
+  .edge.streaming { stroke: var(--ok); stroke-width: 3; stroke-dasharray: 9 6; animation: flow .9s linear infinite; marker-end: url(#arrow-ok); }
+  .edge.alarm { stroke: var(--bad); stroke-width: 3; stroke-dasharray: 9 6; animation: flow .7s linear infinite; marker-end: url(#arrow-bad); }
+  @keyframes flow { to { stroke-dashoffset: -15; } }
+  .edge-label { font-size: 11px; fill: var(--muted); paint-order: stroke; stroke: var(--panel); stroke-width: 4px; }
+  .legend text { font-size: 11.5px; fill: var(--ink-2); }
+
+  #stages { display: flex; flex-direction: column; gap: 12px; }
+  .stage { padding: 14px 16px; transition: border-color .2s, background .2s; }
+  .stage.is-running { border-color: var(--brand-hi); background: linear-gradient(rgba(79, 70, 229, .12), rgba(79, 70, 229, .12)), var(--panel); }
+  .stage-head { display: flex; align-items: center; gap: 10px; }
+  .step { min-width: 30px; height: 30px; border-radius: 8px; background: var(--brand-soft); color: var(--brand-ink); border: 1px solid rgba(99, 102, 241, .3);
+          font: 700 13px var(--mono); display: grid; place-items: center; padding: 0 6px; }
+  .stage-title { font-weight: 700; color: #fff; }
+  .stage-sub { font-size: 12px; color: var(--muted); }
+  .chip { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .05em;
+          text-transform: uppercase; padding: 3px 9px; border-radius: 999px; background: #1e293b; color: var(--muted);
+          border: 1px solid var(--line-2); white-space: nowrap; }
+  .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .8; }
+  .chip.RUNNING, .chip.PENDING, .chip.SCHEDULED { background: var(--brand-soft); color: var(--brand-ink); border-color: rgba(99, 102, 241, .45); }
+  .chip.RUNNING::before { animation: breathe 1s infinite; }
+  .chip.COMPLETED { background: var(--ok-soft); color: var(--ok); border-color: rgba(52, 211, 153, .35); }
+  .chip.FAILED, .chip.CRASHED, .chip.CANCELLED { background: var(--bad-soft); color: var(--bad); border-color: rgba(248, 113, 113, .35); }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--muted); }
+  .controls label { display: inline-flex; align-items: center; gap: 6px; }
+  .controls select, .controls input { font: 500 12px var(--mono); color: var(--ink); background: var(--inset); padding: 4px 6px;
+                                      border: 1px solid var(--line-2); border-radius: 8px; width: 64px; }
+  .controls select:focus, .controls input:focus { outline: none; border-color: var(--brand-hi); box-shadow: 0 0 0 2px rgba(99, 102, 241, .3); }
+  .controls input[type=checkbox] { accent-color: var(--brand-hi); }
+  button { font: inherit; font-weight: 600; font-size: 12px; padding: 6px 14px; border-radius: 12px; border: 1px solid transparent;
+           background: var(--brand); color: #fff; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, .3); transition: background .15s, border-color .15s, color .15s; }
+  button:hover { background: var(--brand-hi); }
+  button.secondary { background: #1e293b; color: var(--ink-2); border-color: var(--line-2); box-shadow: none; text-transform: capitalize; }
+  button.secondary:hover { background: var(--line-2); color: #fff; }
+  button.danger { background: #1e293b; color: var(--bad); border-color: rgba(248, 113, 113, .35); box-shadow: none; }
+  button.danger:hover { background: rgba(239, 68, 68, .15); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  .tasks { list-style: none; margin: 10px 0 0; padding: 0; font-size: 12.5px; }
+  .tasks:empty { display: none; }
+  .tasks li { display: flex; gap: 8px; padding: 5px 10px; color: var(--ink-2); background: var(--inset); border: 1px solid var(--line);
+              border-radius: 10px; margin-top: 4px; font-family: var(--mono); font-size: 11.5px; }
+  .tasks .ic { width: 16px; text-align: center; }
+  li.COMPLETED .ic { color: var(--ok); }
+  .RUNNING .ic, li.RUNNING { color: var(--brand-ink); font-weight: 700; }
+  li.RUNNING { border-color: rgba(99, 102, 241, .5); }
+  li.FAILED, li.CRASHED { color: var(--bad); border-color: rgba(248, 113, 113, .35); }
+  .meta { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+  .meta:empty { display: none; }
+  .meta a { color: var(--brand-ink); text-decoration: none; font-weight: 600; white-space: nowrap; }
+  .meta a:hover { color: #fff; }
+  #feed { padding: 16px 20px; grid-column: 1 / -1; }
+  #feed ol { list-style: none; margin: 0; padding: 0; font-size: 12.5px; columns: 2 320px; column-gap: 32px; color: var(--ink-2); }
+  #feed li { padding: 4px 0; break-inside: avoid; border-bottom: 1px solid rgba(30, 41, 59, .6); }
+  #feed time { color: var(--faint); margin-right: 10px; font: 500 11.5px var(--mono); font-variant-numeric: tabular-nums; }
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg></div>
+    <h1>Fraud Lab</h1>
+    <span class="tag">✈️ Airport · real-time MLOps</span>
+  </div>
+  <nav>
+    <a href="http://localhost:4200" target="_blank">Prefect</a>
+    <a href="http://localhost:5001" target="_blank">MLflow</a>
+    <a href="http://localhost:8080" target="_blank">Kafka UI</a>
+    <a href="http://localhost:8000/docs" target="_blank">Fraud API</a>
+    <a href="http://localhost:3000" target="_blank">Grafana</a>
+    <a href="http://localhost:9090/alerts" target="_blank">Prometheus</a>
+    <a href="http://localhost:9093" target="_blank">Alertmanager</a>
+  </nav>
+  <span id="conn"><span class="ping"></span><span id="conn-text">connecting…</span></span>
+</header>
+
+<main>
+  <section id="arch" class="card" aria-label="Live architecture">
+    <div class="card-head"><span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Live architecture</span><span class="hint">refreshes every 2 s</span></div>
+  </section>
+  <section id="stages" aria-label="Stages"></section>
+  <section id="feed" class="card">
+    <div class="card-head"><span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7l10-5z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>Activity</span><span class="hint" id="feed-count"></span></div>
+    <ol id="feed-list"></ol>
+  </section>
+</main>
+
+<script>
+const W = 200, H = 82;
+const COLS = [30, 265, 500, 735, 970], ROWS = [44, 214, 384, 554];
+const NODES = {
+  dvc:          { c: 0, r: 0, label: "DVC pipeline",       sub: "generate → features" },
+  parquet:      { c: 1, r: 0, label: "Parquet files",      sub: "offline store · DVC remote" },
+  feast:        { c: 2, r: 0, label: "Feast",              sub: "feature registry" },
+  redis:        { c: 3, r: 0, label: "Redis",              sub: "online feature store" },
+  prefect:      { c: 0, r: 1, label: "Prefect",            sub: "orchestrator" },
+  trainer:      { c: 1, r: 1, label: "Trainer",            sub: "scikit-learn job" },
+  mlflow:       { c: 2, r: 1, label: "MLflow tracking",    sub: "Postgres + artifacts" },
+  registry:     { c: 3, r: 1, label: "Model registry",     sub: "airport-fraud-detector" },
+  producer:     { c: 0, r: 2, label: "Airport terminals",  sub: "Kafka producer" },
+  kafka:        { c: 1, r: 2, label: "Kafka",              sub: "airport.transactions" },
+  consumer:     { c: 2, r: 2, label: "Fraud consumers",    sub: "consumer group" },
+  api:          { c: 3, r: 2, label: "Scoring API",        sub: "FastAPI /predict" },
+  alertmanager: { c: 1, r: 3, label: "Alertmanager",       sub: "alert routing" },
+  evidently:    { c: 2, r: 3, label: "Evidently",          sub: "data drift" },
+  prometheus:   { c: 3, r: 3, label: "Prometheus",         sub: "metrics + alert rules" },
+  grafana:      { c: 4, r: 3, label: "Grafana",            sub: "dashboards" },
+};
+// [from, to, label, kind, optional custom path]
+// kind: "task" (animates while both ends run), "live" (animates while both ends are live), "orch", "alert"
+const EDGES = [
+  ["dvc", "parquet", "repro · push", "task"],
+  ["parquet", "feast", "offline source", "task"],
+  ["feast", "redis", "materialize", "task"],
+  ["feast", "trainer", "point-in-time join", "task"],
+  ["trainer", "mlflow", "runs · models", "task"],
+  ["mlflow", "registry", "@champion", "task"],
+  ["registry", "api", "load model", "task"],
+  ["redis", "api", "online features", "task", "M 935 85 C 1030 85, 1030 425, 935 425", [1035, 260]],
+  ["producer", "kafka", "payments", "live"],
+  ["kafka", "consumer", "consume", "live"],
+  ["consumer", "api", "/predict", "live"],
+  ["consumer", "evidently", "features", "live"],
+  ["evidently", "prometheus", "drift", "live"],
+  ["api", "prometheus", "/metrics", "live"],
+  ["prometheus", "grafana", "", "live"],
+  ["prometheus", "alertmanager", "alert rules", "alert", "M 835 636 C 835 690, 365 690, 365 636", [600, 690]],
+  ["alertmanager", "prefect", "drift → retrain", "alert", "M 300 554 C 248 520, 248 330, 180 296", [190, 520]],
+  ["prefect", "dvc", "orchestrates", "orch"],
+  ["prefect", "trainer", "", "orch"],
+  ["prefect", "producer", "", "orch"],
+];
+const BANDS = [
+  [0, "Data & features", "--band-data"], [1, "ML platform & automation", "--band-ml"],
+  [2, "Real-time detection", "--band-rt"], [3, "Monitoring", "--band-mon"],
+];
+const STAGES = [
+  { id: "ingest",  step: "4", title: "Ingest",   sub: "DVC pipeline + Feast apply/materialize" },
+  { id: "train",   step: "5", title: "Train",    sub: "Feast PIT join → 3 models → MLflow" },
+  { id: "publish", step: "6", title: "Publish",  sub: "quality gate → @champion → reload API",
+    controls: `<label><input type="checkbox" id="p-force" style="width:auto"> force</label>`,
+    params: () => ({ force: document.getElementById("p-force").checked }) },
+  { id: "serve",   step: "7", title: "Serve",    sub: "start FastAPI, load @champion, smoke test" },
+  { id: "stream",  step: "8", title: "Stream",   sub: "producer + consumers on Kafka",
+    controls: `consumers <select id="p-consumers"><option>1</option><option>2</option><option selected>3</option></select>
+               tx/s <input id="p-tps" type="number" min="1" max="50" value="5">`,
+    params: () => ({ consumers: +document.getElementById("p-consumers").value,
+                     transactions_per_second: +document.getElementById("p-tps").value }),
+    extra: `<button class="danger" data-run="stop-stream">Stop stream</button>` },
+  { id: "scenario", step: "⚙", title: "Scenario", sub: "change live traffic for monitoring demos", noRun: true,
+    extra: ["normal", "drift", "attack"].map(s => `<button class="secondary" data-scenario="${s}">${s}</button>`).join("") },
+  { id: "retrain", step: "9", title: "Retrain pipeline", sub: "4 → 5 → 6 · nightly 02:00 UTC · on drift alert",
+    params: () => ({ reason: "manual run from the lab console" }) },
+];
+
+// SVG attributes need literal colours; keep in sync with :root
+const C = { idle: "#334155", run: "#6366f1", runSoft: "rgba(99,102,241,.32)", ok: "#34d399", okSoft: "rgba(16,185,129,.16)",
+            bad: "#f87171", badSoft: "rgba(239,68,68,.16)", live: "rgba(52,211,153,.45)", inset: "#020617", line: "#1e293b" };
+const svgNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => {
+  const e = document.createElementNS(svgNS, tag);
+  for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const box = id => ({ x: COLS[NODES[id].c], y: ROWS[NODES[id].r] });
+
+function anchors(a, b) {
+  const A = box(a), B = box(b);
+  if (A.y === B.y) return A.x < B.x ? [[A.x + W, A.y + H / 2], [B.x, B.y + H / 2], "h"] : [[A.x, A.y + H / 2], [B.x + W, B.y + H / 2], "h"];
+  if (A.x === B.x) return A.y < B.y ? [[A.x + W / 2, A.y + H], [B.x + W / 2, B.y], "v"] : [[A.x + W / 2, A.y], [B.x + W / 2, B.y + H], "v"];
+  return A.y < B.y ? [[A.x + W / 2, A.y + H], [B.x + W / 2, B.y], "v"] : [[A.x + W / 2, A.y], [B.x + W / 2, B.y + H], "v"];
+}
+
+function drawArchitecture() {
+  const svg = el("svg", { viewBox: "0 0 1200 760", role: "img", "aria-label": "Lab architecture with live status" });
+  const defs = el("defs", {}, svg);
+  for (const [name, color] of [["idle", C.idle], ["run", C.run], ["ok", C.ok], ["bad", C.bad]]) {
+    const m = el("marker", { id: `arrow-${name}`, viewBox: "0 0 10 10", refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M 0 0 L 10 5 L 0 10 z", fill: color }, m);
+  }
+  for (const [r, label, color] of BANDS) {
+    el("rect", { class: "band", x: 12, y: ROWS[r] - 30, width: r === 3 ? 1176 : 942, height: H + 50, rx: 12,
+                 fill: getComputedStyle(document.documentElement).getPropertyValue(color) }, svg);
+    el("text", { class: "band-label", x: 24, y: ROWS[r] - 12 }, svg).textContent = label;
+  }
+  // legend
+  const lg = el("g", { class: "legend", transform: "translate(12, 712)" }, svg);
+  el("rect", { width: 1176, height: 40, rx: 10, fill: C.inset, stroke: C.line }, lg);
+  const items = [[C.run, C.runSoft, "stage working on it"], [C.ok, C.okSoft, "stage just finished"],
+                 [C.bad, C.badSoft, "failed / alarm"], [C.live, C.inset, "service running"], [C.idle, C.inset, "idle"]];
+  items.forEach(([s, f, t], i) => {
+    el("rect", { x: 14 + i * 150, y: 11, width: 22, height: 18, rx: 4, fill: f, stroke: s, "stroke-width": 2.5 }, lg);
+    el("text", { x: 44 + i * 150, y: 25 }, lg).textContent = t;
+  });
+  [["edge active", C.run], ["data streaming", C.ok], ["alert → retrain", C.bad]].forEach(([t, c], i) => {
+    el("line", { x1: 770 + i * 140, x2: 796 + i * 140, y1: 20, y2: 20, stroke: c, "stroke-width": 3, "stroke-dasharray": "7 5" }, lg);
+    el("text", { x: 804 + i * 140, y: 25 }, lg).textContent = t;
+  });
+
+  const labels = [];
+  for (const [a, b, label, kind, custom, labelAt] of EDGES) {
+    let d, mid;
+    if (custom) {
+      d = custom;
+      mid = labelAt;
+    } else {
+      const [[x1, y1], [x2, y2], dir] = anchors(a, b);
+      d = dir === "h" ? `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}`
+                      : `M ${x1} ${y1} C ${x1} ${(y1 + y2) / 2}, ${x2} ${(y1 + y2) / 2}, ${x2} ${y2}`;
+      // short horizontal hops: label above the gap, vertical ones: beside the line
+      mid = dir === "h" ? [(x1 + x2) / 2, box(a).y - 8] : [(x1 + x2) / 2, (y1 + y2) / 2 + 4];
+    }
+    el("path", { d, class: `edge ${kind === "orch" ? "orch" : ""}`, id: `e-${a}-${b}` }, svg);
+    if (label) labels.push([label, mid]);
+  }
+
+  for (const [id, n] of Object.entries(NODES)) {
+    const { x, y } = box(id);
+    const g = el("g", { class: "node", id: `n-${id}` }, svg);
+    el("rect", { class: "box", x, y, width: W, height: H, rx: 12 }, g);
+    el("circle", { class: "dot", cx: x + W - 14, cy: y + 14, r: 6 }, g);
+    el("text", { class: "label", x: x + 14, y: y + 25 }, g).textContent = n.label;
+    el("text", { class: "sub", x: x + 14, y: y + 44 }, g).textContent = n.sub;
+    el("text", { class: "detail", x: x + 14, y: y + 66, id: `d-${id}` }, g).textContent = "";
+    el("rect", { class: "badge-bg", x: x + W - 92, y: y - 10, width: 76, height: 20, rx: 10 }, g);
+    el("text", { class: "badge", x: x + W - 54, y: y + 4, "text-anchor": "middle", id: `b-${id}` }, g).textContent = "";
+  }
+  for (const [label, [x, y]] of labels)
+    el("text", { class: "edge-label", x, y, "text-anchor": "middle" }, svg).textContent = label;
+  document.getElementById("arch").appendChild(svg);
+}
+
+function drawStages() {
+  const root = document.getElementById("stages");
+  root.innerHTML = STAGES.map(s => `
+    <div class="card stage" id="s-${s.id}">
+      <div class="stage-head">
+        <span class="step">${s.step}</span>
+        <div><div class="stage-title">${s.title}</div><div class="stage-sub">${s.sub}</div></div>
+        <span class="chip" id="chip-${s.id}">not run</span>
+      </div>
+      <div class="controls">
+        ${s.noRun ? "" : `<button data-run="${s.id}">Run</button>`}
+        ${s.controls || ""} ${s.extra || ""}
+      </div>
+      <ul class="tasks" id="t-${s.id}"></ul>
+      <div class="meta" id="m-${s.id}"></div>
+    </div>`).join("");
+  root.addEventListener("click", async ev => {
+    const btn = ev.target.closest("button");
+    if (!btn) return;
+    const stage = btn.dataset.run || (btn.dataset.scenario ? "scenario" : null);
+    if (!stage) return;
+    const def = STAGES.find(s => s.id === stage);
+    const params = btn.dataset.scenario ? { scenario: btn.dataset.scenario } : (def && def.params ? def.params() : {});
+    btn.disabled = true;
+    try {
+      const r = await fetch(`/api/run/${stage}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(params) });
+      if (!r.ok) alertBox((await r.json()).detail || r.statusText);
+    } finally { setTimeout(() => (btn.disabled = false), 1500); refresh(); }
+  });
+}
+
+function setConn(text, cls) {
+  document.getElementById("conn").className = cls;
+  document.getElementById("conn-text").textContent = text;
+}
+function alertBox(msg) { setConn("⚠ " + msg, "err"); }
+
+const ICON = { RUNNING: '<span class="spin">◐</span>', COMPLETED: "✓", FAILED: "✗", CRASHED: "✗", CANCELLED: "–", PENDING: "…", SCHEDULED: "…" };
+const fmtTime = t => t ? new Date(t).toLocaleTimeString() : "";
+const duration = (a, b) => { if (!a) return ""; const s = Math.round(((b ? new Date(b) : new Date()) - new Date(a)) / 1000); return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${s % 60}s`; };
+
+function render(state) {
+  const comps = state.components;
+  const running = new Set(Object.entries(comps).filter(([, c]) => c.task === "running").map(([k]) => k));
+  for (const id of Object.keys(NODES)) {
+    const c = comps[id] || {};
+    const g = document.getElementById(`n-${id}`);
+    g.classList.toggle("live", c.live === true);
+    g.classList.toggle("alarm", !!c.alarm);
+    for (const s of ["running", "done", "failed"]) g.classList.toggle(s, c.task === s);
+    document.getElementById(`d-${id}`).textContent = c.detail || "";
+    document.getElementById(`b-${id}`).textContent = c.task === "running" ? "working…" : c.task === "done" ? "✓ done" : c.task === "failed" ? "✗ failed" : "";
+  }
+  const retrainRun = state.stages.retrain;
+  const alertRetrain = retrainRun && ["RUNNING", "PENDING", "SCHEDULED"].includes(retrainRun.state) &&
+                       String(retrainRun.parameters.reason || "").startsWith("alert");
+  for (const [a, b, , kind] of EDGES) {
+    const e = document.getElementById(`e-${a}-${b}`);
+    const live = comps[a]?.live && comps[b]?.live;
+    e.classList.toggle("active", (kind === "task" || kind === "orch") && running.has(a) && running.has(b));
+    e.classList.toggle("streaming", kind === "live" && !!live && (comps.consumer?.live || a === "api" || a === "prometheus"));
+    e.classList.toggle("alarm", kind === "alert" && (alertRetrain || (a === "prometheus" && comps.alertmanager?.alarm)));
+  }
+
+  for (const s of STAGES) {
+    const run = state.stages[s.id];
+    const chip = document.getElementById(`chip-${s.id}`);
+    chip.className = "chip " + (run ? run.state : "");
+    document.getElementById(`s-${s.id}`).classList.toggle("is-running", !!run && ["RUNNING", "PENDING"].includes(run.state));
+    chip.textContent = run ? (run.state_name || run.state).toLowerCase() : "not run";
+    document.getElementById(`t-${s.id}`).innerHTML = run ? run.tasks.map(t =>
+      `<li class="${t.state}"><span class="ic">${ICON[t.state] || "•"}</span>${t.name}</li>`).join("") : "";
+    document.getElementById(`m-${s.id}`).innerHTML = run
+      ? `<span>${fmtTime(run.start)} · ${duration(run.start, run.end)}${run.parameters.reason ? " · " + run.parameters.reason : ""}</span>
+         <a href="http://localhost:4200/runs/flow-run/${run.flow_run_id}" target="_blank">Prefect ↗</a>` : "";
+    const btn = document.querySelector(`#s-${s.id} button[data-run="${s.id}"]`);
+    if (btn) btn.disabled = run && ["RUNNING", "PENDING"].includes(run.state);
+  }
+
+  const feed = [...state.events.map(e => ({ time: e.time, text: e.text })),
+                ...state.tasks.map(t => ({ time: t.time, text: `${ICON[t.state] || "•"} ${t.name} — ${t.state.toLowerCase()}` }))]
+    .sort((a, b) => (b.time || "").localeCompare(a.time || "")).slice(0, 16);
+  document.getElementById("feed-list").innerHTML = feed.map(f => `<li><time>${fmtTime(f.time)}</time>${f.text}</li>`).join("")
+    || "<li>No activity yet — press Run on a stage.</li>";
+  document.getElementById("feed-count").textContent = feed.length ? `last ${feed.length} events` : "";
+}
+
+async function refresh() {
+  try {
+    const r = await fetch("/api/state");
+    render(await r.json());
+    setConn(`live · ${new Date().toLocaleTimeString()}`, "ok");
+  } catch (e) { alertBox("console backend unreachable"); }
+}
+
+drawArchitecture();
+drawStages();
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>

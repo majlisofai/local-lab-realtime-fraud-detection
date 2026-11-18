@@ -1,0 +1,30 @@
+groups:
+  - name: airport-fraud
+    rules:
+      - alert: FraudApiDown
+        expr: up{job="fraud-api"} == 0
+        for: 30s
+        labels: {severity: critical}
+        annotations:
+          summary: Fraud scoring API is down - payments are not being screened
+
+      - alert: FraudRateHigh
+        expr: sum(rate(fraud_alerts_total[2m])) / sum(rate(fraud_transactions_processed_total[2m])) > 0.10
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: "More than 10% of airport payments flagged as fraud (possible attack)"
+
+      - alert: DataDriftDetected
+        expr: max(evidently_dataset_drift) == 1
+        for: 30s
+        labels: {severity: warning, action: retrain}   # Alertmanager -> lab console -> Prefect retrain
+        annotations:
+          summary: Evidently detected dataset drift - consider retraining the model
+
+      - alert: KafkaConsumerLagHigh
+        expr: sum(kafka_consumergroup_lag{consumergroup="fraud-detector"}) > 500
+        for: 1m
+        labels: {severity: warning}
+        annotations:
+          summary: Fraud consumers are falling behind - scale out with `make scale`
